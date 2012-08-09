@@ -4,13 +4,14 @@ use Test::More;
 
 use let;
 
-sub let { }
-
 my $foo = let (
     $foo = 'bar';
-    @bar = ('baz', 'moo');
+    @bar = ('baz', $foo);
+    %baz = (1, 2, @bar);
 ) {
-    'foo'
+    [$foo, \@bar, \%baz];
 };
+
+diag explain $foo;
 
 done_testing;
