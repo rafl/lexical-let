@@ -1,7 +1,7 @@
 use strict;
 use warnings;
-use inc::Module::Install;
+use ExtUtils::MakeMaker;
 
-all_from 'lib/let.pm';
-
-WriteAll;
+WriteMakefile(
+    NAME => 'let',
+);
