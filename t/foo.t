@@ -87,4 +87,11 @@ my $wa_check = sub {
 is_deeply [$wa_check->()], ['y'], 'wantarray true';
 is scalar($wa_check->()), 'n', 'wantarray false';
 
+# TODO:
+#  - context of RHS expr given different LHSs
+#  - void context vs. scalar context
+#  - lvalue context
+#  - retval of empty block in different contexts
+#  - no assignment - let ($x) {}
+
 done_testing;
