@@ -17,6 +17,9 @@ use Sub::Exporter -setup => {
 
 sub let { croak 'let called as a function' }
 
-XSLoader::load(__PACKAGE__);
+XSLoader::load(
+    __PACKAGE__,
+    $Lexical::Let::{VERSION} ? ${ $Lexical::Let::{VERSION} } : (),
+);
 
 1;
