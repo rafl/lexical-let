@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-package let;
+package Lexical::Let;
 
 use Carp 'croak';
 use XSLoader;

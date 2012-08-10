@@ -14,5 +14,5 @@ IO::File->new('callparser.h', 'w')->print(
 );
 
 WriteMakefile(
-    NAME => 'let',
+    NAME => 'Lexical::Let',
 );

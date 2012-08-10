@@ -304,7 +304,7 @@ myck_entersub_let (pTHX_ OP *entersubop, GV *namegv, SV *protosv)
   return blkop;
 }
 
-MODULE = let  PACKAGE = let
+MODULE = Lexical::Let  PACKAGE = Lexical::Let
 
 PROTOTYPES: DISABLE
 
@@ -312,7 +312,7 @@ BOOT:
 {
   CV *let_cv;
 
-  let_cv = get_cv("let::let", 0);
+  let_cv = get_cv("Lexical::Let::let", 0);
 
   cv_set_call_parser(let_cv, myparse_args_let, &PL_sv_undef);
   cv_set_call_checker(let_cv, myck_entersub_let, (SV *)let_cv);

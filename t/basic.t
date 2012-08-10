@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use Test::Fatal;
 
-use let;
+use Lexical::Let;
 
 ok let { 1 }, 'simple';
 is let { 23 }, 23, 'returned value';

@@ -4,6 +4,6 @@ use Test::More;
 
 BEGIN { $ENV{PERL_DL_NONLAZY} = 1 }
 
-BEGIN { use_ok('let') }
+BEGIN { use_ok('Lexical::Let') }
 
 done_testing;
