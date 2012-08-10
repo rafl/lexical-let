@@ -103,7 +103,6 @@ is exception {
 
 # TODO:
 #  - context of RHS expr given different LHSs
-#  - lvalue context
 
 ok let ($x) ($y) { !defined $x && !defined $y }, 'no assignment';
 ok let ($x; $y) { !defined $x && !defined $y }, 'no assignment';
@@ -111,5 +110,10 @@ ok let (($x, $y)) { !defined $x && !defined $y }, 'no assignment';
 
 is +let {}, undef, 'scalar ctx';
 is_deeply [let {}], [], 'list ctx';
+
+{
+    no warnings 'misc';
+    let ($x) { $x } = 42;
+}
 
 done_testing;
