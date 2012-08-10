@@ -264,7 +264,7 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
   blkop = op_prepend_elem(OP_LINESEQ, initop, parse_block(0));
   blkop = Perl_block_end(aTHX_ blk_floor, blkop);
 
-  enterop = newOP(OP_ENTER, blkop);
+  enterop = newOP(OP_ENTER, 0);
   leaveop = newLISTOP(OP_LEAVE, 0, enterop, NULL);
 
   cUNOPx(leaveop)->op_first = enterop;
