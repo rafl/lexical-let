@@ -270,7 +270,11 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     lex_read_space(0);
   }
 
-  blkop = op_prepend_elem(OP_LINESEQ, initop, parse_block(0));
+  blkop = parse_block(0);
+  if (blkop->op_type == OP_LINESEQ)
+    blkop = cUNOPx(blkop)->op_first;
+
+  blkop = op_append_elem(OP_LINESEQ, initop, blkop);
   blkop = Perl_block_end(aTHX_ blk_floor, blkop);
 
   enterop = newOP(OP_ENTER, 0);
