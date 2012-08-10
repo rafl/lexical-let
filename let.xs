@@ -230,8 +230,6 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
   PERL_UNUSED_ARG(psobj);
   PERL_UNUSED_ARG(flagsp);
 
-  initop = newSTATEOP(0, NULL, newOP(OP_NULL, 0));
-
   blk_floor = Perl_block_start(aTHX_ 1);
 
   lex_read_space(0);
@@ -240,7 +238,7 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     lex_read_space(0);
 
     while (lex_peek_unichar(0) != ')') {
-      OP *declop, *lhs;
+      OP *declop, *lhs, *assignop;
 
       lex_read_space(0);
       lhs = parse_varlist();
@@ -255,7 +253,11 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
         lex_read_space(0);
       }
 
-      op_append_elem(OP_LINESEQ, initop, newASSIGNOP(0, lhs, 0, declop));
+      assignop = newASSIGNOP(0, lhs, 0, declop);
+      if (!initop)
+        initop = newLISTOP(OP_LINESEQ, 0, assignop, NULL);
+      else
+        op_append_elem(OP_LINESEQ, initop, assignop);
     }
 
     lex_read_unichar(0);
