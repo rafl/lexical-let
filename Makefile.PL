@@ -1,18 +1,15 @@
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
-use IO::File;
-use Devel::CallChecker;
-use Devel::CallParser;
 
-IO::File->new('callchecker0.h', 'w')->print(
-    Devel::CallChecker::callchecker0_h,
-);
+use lib 'inc';
+use MMHelper;
 
-IO::File->new('callparser.h', 'w')->print(
-    Devel::CallParser::callparser0_h,
-);
+eval MMHelper::header_generator() or die $@;
 
 WriteMakefile(
-    NAME => 'Lexical::Let',
+    NAME     => 'Lexical::Let',
+    NORECURS => 1,
+    CCFLAGS  => MMHelper::ccflags_static('dev'),
+    MMHelper::mm_args(),
 );

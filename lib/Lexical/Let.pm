@@ -2,6 +2,7 @@ use strict;
 use warnings;
 
 package Lexical::Let;
+# ABSTRACT: Let block scoping keyword
 
 use Carp 'croak';
 use XSLoader;
