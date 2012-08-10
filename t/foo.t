@@ -78,23 +78,39 @@ is exception {
     is $add->(3, 5, 1), 35, 'conditional return';
 }, undef, 'can return from function';
 
-my $wa_check = sub {
-    return let ($x = 23) {
-        wantarray ? 'y' : 'n';
+{
+    my $c;
+    my $wa_check = sub {
+        return let ($x = 23) {
+            $c = wantarray ? 'l' : defined wantarray ? 's' : 'v';
+        };
     };
-};
 
-is_deeply [$wa_check->()], ['y'], 'wantarray true';
-is scalar($wa_check->()), 'n', 'wantarray false';
+    {
+        $wa_check->();
+        is $c, 'v', 'void context';
+    }
+
+    {
+        my $foo = $wa_check->();
+        is $c, 's', 'list context';
+    }
+
+    {
+        my ($foo) = $wa_check->();
+        is $c, 'l', 'list context';
+    }
+}
 
 # TODO:
 #  - context of RHS expr given different LHSs
-#  - void context vs. scalar context
 #  - lvalue context
-#  - retval of empty block in different contexts
 
 ok let ($x) ($y) { !defined $x && !defined $y }, 'no assignment';
 ok let ($x; $y) { !defined $x && !defined $y }, 'no assignment';
 ok let (($x, $y)) { !defined $x && !defined $y }, 'no assignment';
+
+is +let {}, undef, 'scalar ctx';
+is_deeply [let {}], [], 'list ctx';
 
 done_testing;
