@@ -233,8 +233,8 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
   blk_floor = Perl_block_start(aTHX_ 1);
 
   lex_read_space(0);
-  if (lex_peek_unichar(0) == '(') {
-    lex_read_unichar(0);
+  while (lex_peek_unichar(0) != '{') {
+    demand_unichar('(', 0);
     lex_read_space(0);
 
     while (lex_peek_unichar(0) != ')') {
@@ -261,6 +261,7 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     }
 
     lex_read_unichar(0);
+    lex_read_space(0);
   }
 
   blkop = op_prepend_elem(OP_LINESEQ, initop, parse_block(0));

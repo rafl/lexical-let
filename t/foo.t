@@ -23,6 +23,8 @@ is_deeply let (($x, undef, $y) = (4, 5, 6)) { $x + $y }, 10, 'multiple values';
 is_deeply let ((undef) = (4, 5, 6)) { 42 }, 42, 'multiple values';
 is_deeply let (undef = (4, 5, 6)) { 42 }, 42, 'multiple values';
 
+is_deeply let ($x = 4) ($y = 5) { $x + $y }, 9, 'multiple values';
+
 is_deeply [23, let ($x = 42) { $x }], [23, 42], 'constant and let';
 is_deeply [let ($x = 42) { $x }, 23], [42, 23], 'let and constant';
 
