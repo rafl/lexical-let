@@ -14,7 +14,7 @@ use Sub::Exporter -setup => {
     groups  => { default => ['let'] },
 };
 
-sub let { croak 'fail' }
+sub let { croak 'let called as a function' }
 
 XSLoader::load(__PACKAGE__);
 
