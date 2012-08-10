@@ -244,7 +244,6 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
       lhs = parse_varlist();
 
       demand_unichar('=', 0);
-      lex_read_space(0);
       declop = parse_fullexpr(0);
 
       lex_read_space(0);
