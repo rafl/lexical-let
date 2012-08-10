@@ -9,11 +9,19 @@ use let;
 ok let { 1 }, 'simple';
 is let { 23 }, 23, 'returned value';
 
+is let ($x = 23) { $x }, 23, 'simple scalar variable';
 is let ($x = 23;) { $x }, 23, 'simple scalar variable';
 is_deeply let (@x = (3..5)) { [@x] }, [3..5], 'simple array variable';
 is_deeply let (%x = (3..6)) { +{%x} }, {3..6}, 'simple hash variable';
 
-#is_deeply let (($x, $y) = (4, 5)) { $x + $y }, 9, 'multiple values';
+is_deeply let ($y = (5)) { 4 + $y }, 9, 'with parens';
+is_deeply let (($y) = (5)) { 4 + $y }, 9, 'with parens';
+is_deeply let (($y) = 5) { 4 + $y }, 9, 'with parens';
+is_deeply let (($x, $y) = (4, 5)) { $x + $y }, 9, 'multiple values';
+is_deeply let (($x, $y) = 4) { defined $y ? 42 : $x }, 4, 'multiple values';
+is_deeply let (($x, undef, $y) = (4, 5, 6)) { $x + $y }, 10, 'multiple values';
+is_deeply let ((undef) = (4, 5, 6)) { 42 }, 42, 'multiple values';
+is_deeply let (undef = (4, 5, 6)) { 42 }, 42, 'multiple values';
 
 is_deeply [23, let ($x = 42) { $x }], [23, 42], 'constant and let';
 is_deeply [let ($x = 42) { $x }, 23], [42, 23], 'let and constant';

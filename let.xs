@@ -64,7 +64,8 @@ S_parse_idword (pTHX_ char const *prefix, STRLEN prefixlen)
 typedef enum {
   VARt_SV,
   VARt_AV,
-  VARt_HV
+  VARt_HV,
+  VARt_UNDEF
 } vartype;
 
 #define parse_varname(typep) S_parse_varname(aTHX_ typep)
@@ -86,6 +87,9 @@ S_parse_varname (pTHX_ vartype *typep)
   case '%':
     type = VARt_HV;
     break;
+  case 'u':
+    type = VARt_UNDEF;
+    break;
   default:
     croak("syntax error");
     break;
@@ -96,6 +100,9 @@ S_parse_varname (pTHX_ vartype *typep)
 
   lex_read_unichar(0);
   ret = parse_idword(prefix, 1);
+
+  if (type == VARt_UNDEF && strNE(SvPVX(ret), "undef"))
+    croak("syntax error");
 
   *typep = type;
   return ret;
@@ -118,6 +125,9 @@ S_pad_add_my_var_sv (pTHX_ vartype type, SV *varname)
     break;
   case VARt_HV:
     sv_type = SVt_PVHV;
+    break;
+  default:
+    croak("unable to create lexical for this variable type");
     break;
   }
 
@@ -147,6 +157,9 @@ S_mygenop_pad(pTHX_ vartype type, SV *varname)
   OP *pvarop;
 
   switch (type) {
+  case VARt_UNDEF:
+    return newOP(OP_UNDEF, 0);
+    break;
   case VARt_SV:
     optype = OP_PADSV;
     break;
@@ -162,6 +175,49 @@ S_mygenop_pad(pTHX_ vartype type, SV *varname)
   pvarop->op_targ = pad_add_my_var_sv(type, varname);
 
   return pvarop;
+}
+
+#define parse_varlist() S_parse_varlist(aTHX)
+static OP *
+S_parse_varlist (pTHX)
+{
+  bool had_paren = false;
+  OP *ret = NULL;
+
+  if (lex_peek_unichar(0) == '(') {
+    lex_read_unichar(0);
+    had_paren = true;
+    lex_read_space(0);
+  }
+
+  do {
+    vartype type;
+    SV *varname;
+    OP *padop;
+
+    varname = parse_varname(&type);
+    padop = mygenop_pad(type, varname);
+    if (!ret)
+      ret = newLISTOP(OP_LIST, 0, padop, NULL);
+    else
+      ret = op_append_elem(OP_LIST, ret, padop);
+
+    if (had_paren) {
+      lex_read_space(0);
+
+      if (lex_peek_unichar(0) == ',') {
+        lex_read_unichar(0);
+        lex_read_space(0);
+      }
+    }
+
+    lex_read_space(0);
+  } while (had_paren && lex_peek_unichar(0) != ')');
+
+  if (had_paren)
+    demand_unichar(')', 0);
+
+  return ret;
 }
 
 static OP *
@@ -184,12 +240,10 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     lex_read_space(0);
 
     while (lex_peek_unichar(0) != ')') {
-      OP *declop;
-      vartype type;
-      SV *varname;
+      OP *declop, *lhs;
 
       lex_read_space(0);
-      varname = parse_varname(&type);
+      lhs = parse_varlist();
 
       demand_unichar('=', 0);
       lex_read_space(0);
@@ -201,19 +255,17 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
         lex_read_space(0);
       }
 
-      op_append_elem(OP_LINESEQ, initop,
-                     newASSIGNOP(0, mygenop_pad(type, varname), 0, declop));
+      op_append_elem(OP_LINESEQ, initop, newASSIGNOP(0, lhs, 0, declop));
     }
 
     lex_read_unichar(0);
   }
 
-  blkop = parse_block(0);
-  blkop = op_prepend_elem(OP_LINESEQ, initop, blkop);
+  blkop = op_prepend_elem(OP_LINESEQ, initop, parse_block(0));
   blkop = Perl_block_end(aTHX_ blk_floor, blkop);
 
-  enterop = newOP(OP_ENTER, 0);
-  leaveop = newLISTOP(OP_LEAVE, 0, blkop, NULL);
+  enterop = newOP(OP_ENTER, blkop);
+  leaveop = newLISTOP(OP_LEAVE, 0, enterop, NULL);
 
   cUNOPx(leaveop)->op_first = enterop;
   enterop->op_sibling = blkop;
