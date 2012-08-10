@@ -238,21 +238,28 @@ myparse_args_let (pTHX_ GV *namegv, SV *psobj, U32 *flagsp)
     lex_read_space(0);
 
     while (lex_peek_unichar(0) != ')') {
-      OP *declop, *lhs, *assignop;
+      OP *declop = NULL, *lhs, *assignop;
 
       lex_read_space(0);
       lhs = parse_varlist();
 
-      demand_unichar('=', 0);
-      declop = parse_fullexpr(0);
-
       lex_read_space(0);
+      if (lex_peek_unichar(0) == '=') {
+        lex_read_unichar(0);
+        declop = parse_fullexpr(0);
+        lex_read_space(0);
+      }
+
       if (lex_peek_unichar(0) != ')') {
         demand_unichar(';', 0);
         lex_read_space(0);
       }
 
-      assignop = newASSIGNOP(0, lhs, 0, declop);
+      if (declop)
+        assignop = newASSIGNOP(0, lhs, 0, declop);
+      else /* no expr to assign */
+        assignop = lhs;
+
       if (!initop)
         initop = newLISTOP(OP_LINESEQ, 0, assignop, NULL);
       else

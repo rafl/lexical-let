@@ -92,6 +92,9 @@ is scalar($wa_check->()), 'n', 'wantarray false';
 #  - void context vs. scalar context
 #  - lvalue context
 #  - retval of empty block in different contexts
-#  - no assignment - let ($x) {}
+
+ok let ($x) ($y) { !defined $x && !defined $y }, 'no assignment';
+ok let ($x; $y) { !defined $x && !defined $y }, 'no assignment';
+ok let (($x, $y)) { !defined $x && !defined $y }, 'no assignment';
 
 done_testing;
