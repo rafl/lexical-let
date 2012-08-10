@@ -198,7 +198,7 @@ S_parse_varlist (pTHX)
     varname = parse_varname(&type);
     padop = mygenop_pad(type, varname);
     if (!ret)
-      ret = newLISTOP(OP_LIST, 0, padop, NULL);
+      ret = had_paren ? newLISTOP(OP_LIST, 0, padop, NULL) : padop;
     else
       ret = op_append_elem(OP_LIST, ret, padop);
 

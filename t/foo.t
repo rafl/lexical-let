@@ -20,7 +20,6 @@ is_deeply let (($x, $y) = (4, 5)) { $x + $y }, 9, 'multiple values';
 is_deeply let (($x, $y) = 4) { defined $y ? 42 : $x }, 4, 'multiple values';
 is_deeply let (($x, undef, $y) = (4, 5, 6)) { $x + $y }, 10, 'multiple values';
 is_deeply let ((undef) = (4, 5, 6)) { 42 }, 42, 'multiple values';
-is_deeply let (undef = (4, 5, 6)) { 42 }, 42, 'multiple values';
 
 is_deeply let ($x = 4) ($y = 5) { $x + $y }, 9, 'multiple values';
 
@@ -101,9 +100,6 @@ is exception {
     }
 }
 
-# TODO:
-#  - context of RHS expr given different LHSs
-
 ok let ($x) ($y) { !defined $x && !defined $y }, 'no assignment';
 ok let ($x; $y) { !defined $x && !defined $y }, 'no assignment';
 ok let (($x, $y)) { !defined $x && !defined $y }, 'no assignment';
@@ -115,5 +111,9 @@ is_deeply [let {}], [], 'list ctx';
     no warnings 'misc';
     let ($x) { $x } = 42;
 }
+
+is let ($x = sub { wantarray }->()) { $x }, '', 'scalar ctx';
+is let (@x = sub { wantarray }->()) { $x[0] }, 1, 'list ctx';
+is let (@x = (2..5); $c = @x) { $c }, 4, 'ctx';
 
 done_testing;
