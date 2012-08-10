@@ -62,10 +62,10 @@ S_parse_idword (pTHX_ char const *prefix, STRLEN prefixlen)
 }
 
 typedef enum {
+  VARt_UNDEF,
   VARt_SV,
   VARt_AV,
-  VARt_HV,
-  VARt_UNDEF
+  VARt_HV
 } vartype;
 
 #define parse_varname(typep) S_parse_varname(aTHX_ typep)
@@ -78,6 +78,9 @@ S_parse_varname (pTHX_ vartype *typep)
   vartype type;
 
   switch (next_char) {
+  case 'u':
+    type = VARt_UNDEF;
+    break;
   case '$':
     type = VARt_SV;
     break;
@@ -86,9 +89,6 @@ S_parse_varname (pTHX_ vartype *typep)
     break;
   case '%':
     type = VARt_HV;
-    break;
-  case 'u':
-    type = VARt_UNDEF;
     break;
   default:
     croak("syntax error");
