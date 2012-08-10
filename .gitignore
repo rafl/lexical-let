@@ -1,0 +1,10 @@
+/.*
+!.gitignore
+Let.*
+!Let.xs
+MYMETA.*
+META.*
+Makefile*
+!Makefile.PL
+*.h
+*blib
