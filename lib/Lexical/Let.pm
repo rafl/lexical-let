@@ -40,9 +40,9 @@ block in which those lexicals will be available.
 
     let (<lhs> = <expr>; <lhs> = <expr>; ...) ... { <body> }
 
-The syntax is triggered with the C<let> keyword, followed by a sequence
-(can be none at all, or many) of variable declarations, followed by a
-block in which the declared variables will be available.
+The syntax is triggered with the C<let> keyword, followed by a sequence (can be
+none at all, or many) of variable declarations, followed by a block in which the
+declared variables will be available.
 
     let ($x = 23) { $x }
     let (@y = (3..7)) { @y }
@@ -53,30 +53,39 @@ block in which the declared variables will be available.
 
 =head2 Expression Details
 
-The whole C<let> keyword is an expression, not a statement. This means you must
-terminate the statement yourself. It also means the C<let> expressions can be
-used inside any other expression:
+The C<let> keyword is an expression, not a statement. This means the C<let>
+expressions can be used inside any other expression:
 
     my $x = let ($y = 23) { $y } + let ($z = 42) { $z };
+    push @x, let (...) { ... };
 
-The context will also be properly propagated to the block.
+The context (scalar, list, etc) in which let is used is propagated to the let
+block. The context of the left hand side of variable assignments within let
+declarations is propogated into the expression on the right hand side.
+
+    my $x = let (...) { @foo }; # @foo is evaluated in scalar context
+    my @y = let (...) { @foo }; # @foo is evaluated in list context
 
 =head2 Sequential Access
 
-The lexicals that are declared can be sequentially accessed. This means that
-every variable can access those before it:
+When multiple variables are declared in a single let statement, subsequent
+variables have access to any variable declared before it. For example, a
+variable x declared first in a let statement is available for use by a variable
+y declared after it. A variable z declared after y has access to both y and x. x
+and y, however, cannot use z, and x cannot use y.
 
     let ($x = 23) ($y = $x * 2) { $y }
     let ($x = 23;  $y = $x * 2) { $y }
 
-=head2 Transformation
+=head2 Implementation Details
 
-Internally, the C<let> expression will be turned into a C<do> expression. This
-is done at an optree level and should result in rather fast code.
+Internally, this module turns a C<let> expression into a C<do>
+expression. Because this transformation is done at an optree level it results in
+rather fast code.
 
     let ($x = 23) { say $x }
 
-will be transformed into (more or less):
+turns into (more or less):
 
     do { my $x = 23; say $x }
 
